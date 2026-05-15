@@ -291,9 +291,6 @@ class App {
         duration: 1,
       },
     });
-
-    workout.click();
-    console.log(workout);
   }
 
   _setLocalStorage() {
@@ -307,9 +304,13 @@ class App {
     this.#workouts = JSON.parse(data);
 
     this.#workouts.forEach(session => {
-      console.log(session);
       this._renderWorkout(session);
     });
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
