@@ -13,6 +13,7 @@ let workout;
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10);
+  clicks = 0;
 
   constructor(coords, distance, duration) {
     this.coords = coords;
@@ -25,6 +26,10 @@ class Workout {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${months[this.date.getMonth()]} ${this.date.getDate()}`;
     return this.description;
+  }
+
+  click() {
+    this.clicks++;
   }
 }
 
@@ -66,6 +71,7 @@ class App {
   #map;
   #mapEvent;
   #workouts = [];
+  #zoomLevel = 16;
 
   constructor() {
     //Loading the map and getting user position
@@ -76,6 +82,9 @@ class App {
 
     //Switching between exercise types
     inputType.addEventListener('change', this._toggleElevationField);
+
+    //Zoom workout into view
+    containerWorkouts.addEventListener('click', this._moveToWorkout.bind(this));
   }
 
   _getPosition() {
@@ -93,7 +102,7 @@ class App {
     const { latitude, longitude } = position.coords;
     const coords = [latitude, longitude];
 
-    this.#map = L.map('map').setView(coords, 16);
+    this.#map = L.map('map').setView(coords, this.#zoomLevel);
 
     L.tileLayer(
       `https://api.maptiler.com/maps/streets-v4/{z}/{x}/{y}.png?key=${'sHKaCXOCc2CTgH2DZtvH'}`,
@@ -255,6 +264,25 @@ class App {
     }
 
     form.insertAdjacentHTML('afterend', html);
+  }
+
+  _moveToPopup(event) {
+    const workoutEl = event.target.closest('.workout');
+    if (!workoutEl) return;
+
+    const workout = this.#workouts.find(
+      work => work.id === workoutEl.dataset.id,
+    );
+
+    this.#map.setView(workout.coords, this.#zoomLevel, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
+
+    workout.click();
+    console.log(workout);
   }
 }
 
