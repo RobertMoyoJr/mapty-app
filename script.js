@@ -13,7 +13,7 @@ let workout;
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10);
-  clicks = 0;
+  // clicks = 0;
 
   constructor(coords, distance, duration) {
     this.coords = coords;
@@ -28,9 +28,9 @@ class Workout {
     return this.description;
   }
 
-  click() {
-    this.clicks++;
-  }
+  // click() {
+  //   this.clicks++;
+  // }
 }
 
 class Running extends Workout {
@@ -84,7 +84,10 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
 
     //Zoom workout into view
-    containerWorkouts.addEventListener('click', this._moveToWorkout.bind(this));
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+
+    //Get data from local storage
+    this._getLocalStorage();
   }
 
   _getPosition() {
@@ -119,6 +122,11 @@ class App {
 
     //Handling click on map
     this.#map.on('click', this._showForm.bind(this));
+
+    //Render workout markers from previous session
+    this.#workouts.forEach(session => {
+      this._renderWorkoutMarker(session);
+    });
   }
 
   _showForm(mapE) {
@@ -198,6 +206,9 @@ class App {
 
     //Hide Form + Clear input fields
     this._hideForm();
+
+    //Send data to local storage
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -283,6 +294,22 @@ class App {
 
     workout.click();
     console.log(workout);
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = localStorage.getItem('workouts');
+
+    if (!data) return;
+    this.#workouts = JSON.parse(data);
+
+    this.#workouts.forEach(session => {
+      console.log(session);
+      this._renderWorkout(session);
+    });
   }
 }
 
